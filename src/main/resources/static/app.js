@@ -2,7 +2,7 @@
 // Taka Bachai — Complete Frontend Logic
 // =============================================
 
-const API = '';
+const API = 'https://taka-bachai.onrender.com';
 let currentUserId = 1;
 let categories = [];
 let wallets = [];
