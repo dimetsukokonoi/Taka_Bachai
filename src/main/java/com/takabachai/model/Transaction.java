@@ -1,13 +1,20 @@
 package com.takabachai.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transactions")
 public class Transaction {
+
+    public static final String TYPE_PATTERN = "INCOME|EXPENSE";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +32,16 @@ public class Transaction {
     private Long categoryId;
 
     @NotNull
+    @Pattern(regexp = TYPE_PATTERN, message = "type must be INCOME or EXPENSE")
     @Column(nullable = false, length = 10)
-    private String type; // INCOME or EXPENSE
+    private String type;
 
     @NotNull
+    @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
+    @Size(max = 255)
     @Column(length = 255)
     private String description;
 
@@ -39,16 +49,17 @@ public class Transaction {
     @Column(name = "transaction_date", nullable = false)
     private LocalDateTime transactionDate;
 
+    @Size(max = 500)
     @Column(name = "receipt_path", length = 500)
     private String receiptPath;
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     public Transaction() {
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

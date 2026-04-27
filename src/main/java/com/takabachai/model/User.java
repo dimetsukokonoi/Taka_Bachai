@@ -3,6 +3,10 @@ package com.takabachai.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,21 +18,26 @@ public class User {
     private Long id;
 
     @NotBlank
+    @Size(max = 100)
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
     @Email
     @NotBlank
+    @Size(max = 150)
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
+    @Size(max = 20)
     @Column(length = 20)
     private String phone;
 
+    @Pattern(regexp = "USER|ADMIN", message = "role must be USER or ADMIN")
     @Column(length = 20)
-    private String role;
+    private String role = "USER";
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     public User() {
@@ -40,7 +49,6 @@ public class User {
         this.phone = phone;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

@@ -1,8 +1,13 @@
 package com.takabachai.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,31 +31,35 @@ public class RecurringBill {
     private Long categoryId;
 
     @NotBlank
+    @Size(max = 100)
     @Column(name = "bill_name", nullable = false, length = 100)
     private String billName;
 
     @NotNull
+    @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
     @NotBlank
+    @Pattern(regexp = "DAILY|WEEKLY|MONTHLY|YEARLY", message = "frequency must be DAILY, WEEKLY, MONTHLY or YEARLY")
     @Column(nullable = false, length = 20)
-    private String frequency; // DAILY, WEEKLY, MONTHLY, YEARLY
+    private String frequency;
 
     @NotNull
     @Column(name = "next_due_date", nullable = false)
     private LocalDate nextDueDate;
 
-    @Column(name = "is_active")
+    @NotNull
+    @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     public RecurringBill() {
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

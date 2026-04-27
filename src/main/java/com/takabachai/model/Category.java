@@ -2,6 +2,8 @@ package com.takabachai.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "categories")
@@ -12,23 +14,26 @@ public class Category {
     private Long id;
 
     @NotBlank
+    @Size(max = 50)
     @Column(nullable = false, length = 50)
     private String name;
 
     @NotBlank
+    @Pattern(regexp = "INCOME|EXPENSE", message = "type must be INCOME or EXPENSE")
     @Column(nullable = false, length = 10)
-    private String type; // INCOME or EXPENSE
+    private String type;
 
+    @Size(max = 50)
     @Column(length = 50)
     private String icon;
 
+    @Size(max = 10)
     @Column(length = 10)
     private String color;
 
     public Category() {
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

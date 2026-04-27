@@ -1,5 +1,6 @@
 package com.takabachai.service;
 
+import com.takabachai.exception.ResourceNotFoundException;
 import com.takabachai.model.RecurringBill;
 import com.takabachai.repository.RecurringBillRepository;
 import org.springframework.stereotype.Service;
@@ -39,18 +40,23 @@ public class RecurringBillService {
 
     public RecurringBill updateBill(Long id, RecurringBill billData) {
         RecurringBill bill = recurringBillRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Recurring bill not found with id: " + id));
+                .orElseThrow(() -> ResourceNotFoundException.of("Recurring bill", id));
         bill.setBillName(billData.getBillName());
         bill.setAmount(billData.getAmount());
         bill.setFrequency(billData.getFrequency());
         bill.setNextDueDate(billData.getNextDueDate());
         bill.setWalletId(billData.getWalletId());
         bill.setCategoryId(billData.getCategoryId());
-        bill.setIsActive(billData.getIsActive());
+        if (billData.getIsActive() != null) {
+            bill.setIsActive(billData.getIsActive());
+        }
         return recurringBillRepository.save(bill);
     }
 
     public void deleteBill(Long id) {
+        if (!recurringBillRepository.existsById(id)) {
+            throw ResourceNotFoundException.of("Recurring bill", id);
+        }
         recurringBillRepository.deleteById(id);
     }
 }

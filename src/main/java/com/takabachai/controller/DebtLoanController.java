@@ -1,18 +1,16 @@
 package com.takabachai.controller;
 
+import com.takabachai.dto.BalanceAdjustmentRequest;
 import com.takabachai.model.DebtLoan;
 import com.takabachai.service.DebtLoanService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/debts")
-@CrossOrigin(origins = "*")
 public class DebtLoanController {
 
     private final DebtLoanService debtLoanService;
@@ -49,9 +47,9 @@ public class DebtLoanController {
     }
 
     @PostMapping("/{id}/pay")
-    public ResponseEntity<DebtLoan> makePayment(@PathVariable Long id, @RequestBody Map<String, BigDecimal> body) {
-        BigDecimal amount = body.get("amount");
-        return ResponseEntity.ok(debtLoanService.makePayment(id, amount));
+    public ResponseEntity<DebtLoan> makePayment(@PathVariable Long id,
+                                                @Valid @RequestBody BalanceAdjustmentRequest body) {
+        return ResponseEntity.ok(debtLoanService.makePayment(id, body.getAmount()));
     }
 
     @DeleteMapping("/{id}")

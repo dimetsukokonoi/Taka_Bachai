@@ -1,5 +1,6 @@
 package com.takabachai.service;
 
+import com.takabachai.exception.ResourceNotFoundException;
 import com.takabachai.model.Budget;
 import com.takabachai.model.Transaction;
 import com.takabachai.repository.BudgetRepository;
@@ -38,7 +39,7 @@ public class BudgetService {
 
     public Budget updateBudget(Long id, Budget budgetData) {
         Budget budget = budgetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Budget not found with id: " + id));
+                .orElseThrow(() -> ResourceNotFoundException.of("Budget", id));
         budget.setLimitAmount(budgetData.getLimitAmount());
         budget.setCategoryId(budgetData.getCategoryId());
         budget.setBudgetMonth(budgetData.getBudgetMonth());
@@ -46,6 +47,9 @@ public class BudgetService {
     }
 
     public void deleteBudget(Long id) {
+        if (!budgetRepository.existsById(id)) {
+            throw ResourceNotFoundException.of("Budget", id);
+        }
         budgetRepository.deleteById(id);
     }
 

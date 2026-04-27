@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recurring-bills")
-@CrossOrigin(origins = "*")
 public class RecurringBillController {
 
     private final RecurringBillService billService;

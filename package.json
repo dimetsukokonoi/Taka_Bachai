@@ -1,0 +1,10 @@
+{
+  "name": "taka-bachai",
+  "version": "1.0.0",
+  "description": "Taka Bachai frontend and backend dev orchestrator",
+  "scripts": {
+    "dev": ".\\maven\\apache-maven-3.9.9\\bin\\mvn.cmd spring-boot:run"
+  },
+  "author": "",
+  "license": "ISC"
+}

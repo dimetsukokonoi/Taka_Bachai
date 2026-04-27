@@ -1,8 +1,13 @@
 package com.takabachai.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +15,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "debts_loans")
 public class DebtLoan {
+
+    public static final String TYPE_PATTERN = "DEBT|LOAN";
+    public static final String STATUS_PATTERN = "PENDING|PARTIALLY_PAID|PAID";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,37 +28,43 @@ public class DebtLoan {
     private Long userId;
 
     @NotBlank
+    @Pattern(regexp = TYPE_PATTERN, message = "type must be DEBT or LOAN")
     @Column(nullable = false, length = 10)
-    private String type; // DEBT or LOAN
+    private String type;
 
     @NotBlank
+    @Size(max = 100)
     @Column(name = "person_name", nullable = false, length = 100)
     private String personName;
 
     @NotNull
+    @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
     @NotNull
+    @DecimalMin(value = "0.00", message = "Remaining amount cannot be negative")
     @Column(name = "remaining_amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal remainingAmount;
 
+    @Size(max = 255)
     @Column(length = 255)
     private String description;
 
     @Column(name = "due_date")
     private LocalDate dueDate;
 
+    @Pattern(regexp = STATUS_PATTERN, message = "status must be PENDING, PARTIALLY_PAID or PAID")
     @Column(length = 20)
-    private String status = "PENDING"; // PENDING, PARTIALLY_PAID, PAID
+    private String status = "PENDING";
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     public DebtLoan() {
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

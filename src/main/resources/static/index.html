@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Taka Bachai — a personal finance manager built for Bangladesh. Track income, expenses, debts and savings goals.">
+    <meta name="theme-color" content="#f97316">
     <title>Taka Bachai — Personal Finance Manager</title>
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,7 +41,7 @@
                 </p>
                 <div class="hero-actions">
                     <div class="user-login-box">
-                        <label>Select your account to continue</label>
+                        <label for="homeUserSelect">Select your account to continue</label>
                         <select id="homeUserSelect" class="home-user-select"></select>
                         <button class="btn btn-orange btn-lg" onclick="enterDashboard()">
                             Open Dashboard <i class="ph ph-arrow-right"></i>
@@ -49,11 +51,9 @@
                 <div class="hero-stats">
                     <div class="stat-item"><span class="stat-num">10+</span><span class="stat-label">Users</span></div>
                     <div class="stat-divider"></div>
-                    <div class="stat-item"><span class="stat-num">10</span><span class="stat-label">Features</span>
-                    </div>
+                    <div class="stat-item"><span class="stat-num">12</span><span class="stat-label">Features</span></div>
                     <div class="stat-divider"></div>
-                    <div class="stat-item"><span class="stat-num">৳</span><span class="stat-label">BDT Currency</span>
-                    </div>
+                    <div class="stat-item"><span class="stat-num">৳</span><span class="stat-label">BDT Currency</span></div>
                 </div>
             </div>
             <div class="hero-visual">
@@ -71,7 +71,7 @@
                 </div>
                 <div class="feature-card"><i class="ph ph-tag"></i>
                     <h3>Expense Categories</h3>
-                    <p>Organize spending into Food, Transport, Rent, Shopping & more</p>
+                    <p>Organize spending into Food, Transport, Rent, Shopping &amp; more</p>
                 </div>
                 <div class="feature-card"><i class="ph ph-wallet"></i>
                     <h3>Multi-Wallet</h3>
@@ -90,7 +90,7 @@
                     <p>Save towards your dreams — track progress visually</p>
                 </div>
                 <div class="feature-card"><i class="ph ph-handshake"></i>
-                    <h3>Debt & Loan Tracker</h3>
+                    <h3>Debt &amp; Loan Tracker</h3>
                     <p>Keep records of who owes you and what you owe</p>
                 </div>
                 <div class="feature-card"><i class="ph ph-chart-line-up"></i>
@@ -102,8 +102,16 @@
                     <p>Attach photos of receipts to any transaction</p>
                 </div>
                 <div class="feature-card"><i class="ph ph-magnifying-glass"></i>
-                    <h3>Search & Filter</h3>
+                    <h3>Search &amp; Filter</h3>
                     <p>Find any transaction by keyword, date, or type instantly</p>
+                </div>
+                <div class="feature-card"><i class="ph ph-shield-check"></i>
+                    <h3>Admin Panel</h3>
+                    <p>Manage users, view financial summaries and platform-wide insights</p>
+                </div>
+                <div class="feature-card"><i class="ph ph-chart-bar"></i>
+                    <h3>Spending Insights</h3>
+                    <p>See exactly where you spend more than the platform average</p>
                 </div>
             </div>
         </section>
@@ -117,7 +125,7 @@
                     modern UI practices.</p>
                 <div class="tech-stack">
                     <span class="tech-badge">☕ Spring Boot</span>
-                    <span class="tech-badge">🗄️ H2 / Supabase</span>
+                    <span class="tech-badge">🗄️ H2 / PostgreSQL</span>
                     <span class="tech-badge">🌐 HTML / CSS / JS</span>
                     <span class="tech-badge">📊 Chart.js</span>
                 </div>
@@ -139,31 +147,27 @@
                         <img src="logo.png" alt="Taka Bachai" class="sidebar-logo-img">
                     </div>
                     <div class="top-icons">
-                        <i class="ph ph-magnifying-glass"></i>
-                        <i class="ph ph-bell"></i>
-                        <i class="ph ph-gear" style="cursor:pointer" onclick="goHome()"></i>
+                        <i class="ph ph-bell" title="Notifications"></i>
+                        <i class="ph ph-house" style="cursor:pointer" onclick="goHome()" title="Back to homepage"></i>
                     </div>
                 </div>
 
                 <nav class="nav-links">
                     <a href="#" class="nav-item" data-page="dashboard"><i class="ph ph-house"></i> Dashboard</a>
                     <a href="#" class="nav-item active" data-page="accounts"><i class="ph ph-wallet"></i> Accounts</a>
-                    <a href="#" class="nav-item" data-page="transactions"><i class="ph ph-list-dashes"></i>
-                        Transactions</a>
+                    <a href="#" class="nav-item" data-page="transactions"><i class="ph ph-list-dashes"></i> Transactions</a>
                     <a href="#" class="nav-item" data-page="reports"><i class="ph ph-chart-line-up"></i> Reports</a>
                     <a href="#" class="nav-item" data-page="budgets"><i class="ph ph-chart-pie"></i> Budget</a>
                     <a href="#" class="nav-item" data-page="bills"><i class="ph ph-calendar-blank"></i> Recurring</a>
                     <a href="#" class="nav-item" data-page="goals"><i class="ph ph-target"></i> Goals</a>
                     <a href="#" class="nav-item" data-page="debts"><i class="ph ph-handshake"></i> Loans</a>
-                    <a href="#" class="nav-item" data-page="admin" id="navAdmin" style="display:none; color: var(--orange); font-weight: 600;"><i class="ph ph-shield-check"></i> Admin Panel</a>
+                    <a href="#" class="nav-item" data-page="admin" id="navAdmin" style="display:none;"><i class="ph ph-shield-check"></i> Admin Panel</a>
                 </nav>
 
                 <div class="sidebar-bottom">
-                    <a href="#" class="nav-item" style="margin-bottom: 8px;"><i class="ph ph-question"></i> Help &
-                        Support</a>
                     <div class="user-profile">
                         <div class="avatar"><i class="ph ph-user"></i></div>
-                        <select id="userSelect" class="user-select"></select>
+                        <select id="userSelect" class="user-select" aria-label="Switch user"></select>
                     </div>
                 </div>
             </aside>
@@ -171,12 +175,7 @@
             <main class="main-area">
                 <header class="main-header">
                     <h1 id="pageTitle">Accounts</h1>
-                    <div class="header-buttons" id="headerActions">
-                        <button class="btn btn-outline" onclick="loadAccounts()"><i class="ph ph-arrows-clockwise"></i>
-                            Refresh all</button>
-                        <button class="btn btn-orange" onclick="showAddWallet()"><i class="ph ph-plus"></i> Add
-                            account</button>
-                    </div>
+                    <div class="header-buttons" id="headerActions"></div>
                 </header>
 
                 <div class="page-content" id="page-accounts">
@@ -185,14 +184,14 @@
                         <div class="nw-flex-row">
                             <div class="nw-amount-wrapper">
                                 <div class="nw-amount" id="netWorthValue">৳0.00</div>
-                                <div class="nw-change text-green" id="netWorthChange">↑ ৳0.00 (0%) 1 month change</div>
+                                <div class="nw-change" id="netWorthChange">↑ ৳0.00 (0%) last 30 days</div>
                             </div>
                             <div class="nw-controls">
-                                <select class="dropdown">
+                                <select class="dropdown" disabled>
                                     <option>Net worth performance</option>
                                 </select>
-                                <select class="dropdown">
-                                    <option>1 month</option>
+                                <select class="dropdown" disabled>
+                                    <option>Last 30 days</option>
                                 </select>
                             </div>
                         </div>
@@ -204,17 +203,18 @@
                         <div class="summary-col">
                             <div class="summary-header">
                                 <h3>Summary</h3>
-                                <div class="toggle-pill"><button id="btnSumTotals" class="active" onclick="toggleSummaryMode('totals')">Totals</button><button id="btnSumPercent" onclick="toggleSummaryMode('percent')">Percent</button></div>
+                                <div class="toggle-pill">
+                                    <button id="btnSumTotals" class="active" onclick="toggleSummaryMode('totals')">Totals</button>
+                                    <button id="btnSumPercent" onclick="toggleSummaryMode('percent')">Percent</button>
+                                </div>
                             </div>
                             <div class="summary-block mb-large">
-                                <div class="summary-block-title"><span>Assets</span><span id="sumAssetsVal">৳0.00</span>
-                                </div>
+                                <div class="summary-block-title"><span>Assets</span><span id="sumAssetsVal">৳0.00</span></div>
                                 <div class="summary-multi-bar" id="assetBarMulti"></div>
                                 <div class="summary-legend" id="assetBreakdown"></div>
                             </div>
                             <div class="summary-block mt-large">
-                                <div class="summary-block-title"><span>Liabilities</span><span
-                                        id="sumLiabsVal">৳0.00</span></div>
+                                <div class="summary-block-title"><span>Liabilities</span><span id="sumLiabsVal">৳0.00</span></div>
                                 <div class="summary-multi-bar" id="liabBarMulti"></div>
                                 <div class="summary-legend" id="liabBreakdown"></div>
                             </div>
@@ -223,18 +223,14 @@
                 </div>
 
                 <div class="page-content hidden" id="page-generic">
-                    <section class="net-worth-section">
-                        <div class="nw-controls" style="margin-bottom: 24px;">
-                            <input type="text" id="genericSearch" class="dropdown" placeholder="Search records..."
-                                style="width:280px;">
-                            <select id="genericFilter" class="dropdown hidden">
-                                <option>All</option>
-                            </select>
+                    <section class="module-content">
+                        <div class="generic-filter-bar" id="genericFilterBar"></div>
+                        <div id="genericTableWrap" class="generic-table-wrap">
+                            <table class="data-table" id="genericTable">
+                                <thead id="genericTableHead"></thead>
+                                <tbody id="genericTableBody"></tbody>
+                            </table>
                         </div>
-                        <table class="data-table" id="genericTable">
-                            <thead id="genericTableHead"></thead>
-                            <tbody id="genericTableBody"></tbody>
-                        </table>
                     </section>
                 </div>
             </main>
@@ -242,15 +238,18 @@
     </div>
 
     <!-- Modal -->
-    <div id="modalOverlay" class="modal-overlay hidden">
+    <div id="modalOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true">
         <div class="modal-box">
             <div class="modal-top">
                 <h3 id="modalTitle">Modal</h3>
-                <button class="modal-close" onclick="closeModal()"><i class="ph ph-x"></i></button>
+                <button class="modal-close" onclick="closeModal()" aria-label="Close"><i class="ph ph-x"></i></button>
             </div>
             <div class="modal-content" id="modalBody"></div>
         </div>
     </div>
+
+    <!-- Toast container -->
+    <div id="toastRoot" class="toast-root" aria-live="polite"></div>
 
     <script src="app.js"></script>
 </body>

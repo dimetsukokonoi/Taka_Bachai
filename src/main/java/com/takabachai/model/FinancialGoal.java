@@ -1,8 +1,13 @@
 package com.takabachai.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +15,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "financial_goals")
 public class FinancialGoal {
+
+    public static final String STATUS_PATTERN = "IN_PROGRESS|COMPLETED|CANCELLED";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,28 +27,32 @@ public class FinancialGoal {
     private Long userId;
 
     @NotBlank
+    @Size(max = 100)
     @Column(name = "goal_name", nullable = false, length = 100)
     private String goalName;
 
     @NotNull
+    @DecimalMin(value = "0.01", message = "Target amount must be greater than 0")
     @Column(name = "target_amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal targetAmount;
 
+    @DecimalMin(value = "0.00", message = "Current amount cannot be negative")
     @Column(name = "current_amount", precision = 15, scale = 2)
     private BigDecimal currentAmount = BigDecimal.ZERO;
 
     private LocalDate deadline;
 
+    @Pattern(regexp = STATUS_PATTERN, message = "status must be IN_PROGRESS, COMPLETED or CANCELLED")
     @Column(length = 20)
-    private String status = "IN_PROGRESS"; // IN_PROGRESS, COMPLETED, CANCELLED
+    private String status = "IN_PROGRESS";
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     public FinancialGoal() {
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

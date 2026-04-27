@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/wallets")
-@CrossOrigin(origins = "*")
 public class WalletController {
 
     private final WalletService walletService;

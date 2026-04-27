@@ -1,14 +1,21 @@
 package com.takabachai.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "wallets")
 public class Wallet {
+
+    public static final String TYPE_PATTERN = "CASH|BKASH|NAGAD|BANK|ROCKET|CREDIT_CARD";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,26 +26,31 @@ public class Wallet {
     private Long userId;
 
     @NotBlank
+    @Size(max = 50)
     @Column(name = "wallet_name", nullable = false, length = 50)
     private String walletName;
 
     @NotBlank
+    @Pattern(regexp = TYPE_PATTERN, message = "walletType must be one of CASH, BKASH, NAGAD, BANK, ROCKET, CREDIT_CARD")
     @Column(name = "wallet_type", nullable = false, length = 30)
     private String walletType;
 
-    @Column(precision = 15, scale = 2)
+    @NotNull
+    @DecimalMin(value = "0.00", inclusive = true, message = "Balance cannot be negative")
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
 
-    @Column(length = 5)
+    @Size(max = 5)
+    @Column(nullable = false, length = 5)
     private String currency = "BDT";
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     public Wallet() {
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

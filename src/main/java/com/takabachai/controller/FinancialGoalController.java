@@ -1,18 +1,16 @@
 package com.takabachai.controller;
 
+import com.takabachai.dto.BalanceAdjustmentRequest;
 import com.takabachai.model.FinancialGoal;
 import com.takabachai.service.FinancialGoalService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/goals")
-@CrossOrigin(origins = "*")
 public class FinancialGoalController {
 
     private final FinancialGoalService goalService;
@@ -44,14 +42,15 @@ public class FinancialGoalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FinancialGoal> updateGoal(@PathVariable Long id, @Valid @RequestBody FinancialGoal goal) {
+    public ResponseEntity<FinancialGoal> updateGoal(@PathVariable Long id,
+                                                    @Valid @RequestBody FinancialGoal goal) {
         return ResponseEntity.ok(goalService.updateGoal(id, goal));
     }
 
     @PostMapping("/{id}/add")
-    public ResponseEntity<FinancialGoal> addToGoal(@PathVariable Long id, @RequestBody Map<String, BigDecimal> body) {
-        BigDecimal amount = body.get("amount");
-        return ResponseEntity.ok(goalService.addToGoal(id, amount));
+    public ResponseEntity<FinancialGoal> addToGoal(@PathVariable Long id,
+                                                   @Valid @RequestBody BalanceAdjustmentRequest body) {
+        return ResponseEntity.ok(goalService.addToGoal(id, body.getAmount()));
     }
 
     @DeleteMapping("/{id}")

@@ -1,7 +1,10 @@
 package com.takabachai.service;
 
+import com.takabachai.exception.BadRequestException;
+import com.takabachai.exception.ResourceNotFoundException;
 import com.takabachai.model.User;
 import com.takabachai.repository.UserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,19 +32,47 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        return userRepository.save(user);
+        if (user.getRole() == null || user.getRole().isBlank()) {
+            user.setRole("USER");
+        }
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new BadRequestException("A user with that email already exists");
+        }
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("Could not create user: " + rootCauseMessage(e));
+        }
     }
 
     public User updateUser(Long id, User userData) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> ResourceNotFoundException.of("User", id));
         user.setFullName(userData.getFullName());
         user.setEmail(userData.getEmail());
         user.setPhone(userData.getPhone());
-        return userRepository.save(user);
+        if (userData.getRole() != null && !userData.getRole().isBlank()) {
+            user.setRole(userData.getRole());
+        }
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("Could not update user: " + rootCauseMessage(e));
+        }
     }
 
     public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw ResourceNotFoundException.of("User", id);
+        }
         userRepository.deleteById(id);
+    }
+
+    private String rootCauseMessage(Throwable t) {
+        Throwable cur = t;
+        while (cur.getCause() != null && cur.getCause() != cur) {
+            cur = cur.getCause();
+        }
+        return cur.getMessage();
     }
 }

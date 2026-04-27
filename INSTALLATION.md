@@ -1,86 +1,157 @@
-# Taka Bachai - Installation & Deployment Guide
+# Taka Bachai — Installation & Deployment Guide
 
-This guide provides step-by-step instructions on how to set up, build, and run the **Taka Bachai** personal finance system on your local machine. Because this project is self-contained (using an in-memory database), you do not need to install complex external database servers like MySQL or PostgreSQL.
-
----
-
-## Prerequisites
-
-Before running the project, ensure your system has the following installed:
-
-1. **Java Development Kit (JDK) 21**
-   - The backend is built on Spring Boot 3.5.13 and requires **Java 21**.
-   - You can download it from [Oracle](https://www.oracle.com/java/technologies/downloads/#java21) or use an open-source distribution like [Adoptium Eclipse Temurin](https://adoptium.net/).
-   - To verify your installation, open a terminal and run:
-     ```bash
-     java -version
-     ```
-
-2. **Git** (Optional, but recommended for version control)
-   - [Download Git](https://git-scm.com/downloads)
-
-*(Note: You do **not** need Node.js or npm to run the Taka Bachai website, as the frontend uses Vanilla HTML/JS served directly by the Spring Boot server).*
+This guide walks you through setting up, building, running and (optionally) deploying **Taka Bachai**, a personal finance system that ships with its own database, frontend and REST API in a single Spring Boot application.
 
 ---
 
-## Running the Project Locally
+## 1. Prerequisites
 
-The project uses **Maven** for dependency management and building. We have included a "Maven Wrapper" (`mvnw` for Linux/Mac, `mvnw.cmd` for Windows) inside the project folder so that you don't even need to install Maven globally.
+| Tool | Version | Why |
+|------|---------|-----|
+| **JDK** | 21+ | Spring Boot 3 requires Java 21. Use [Adoptium Temurin](https://adoptium.net/) or Oracle JDK. |
+| **Git** | any | Optional — only needed if you clone the repository. |
+| **Docker** | any | Optional — only needed for the container deployment route. |
 
-### Step 1: Open the Project Directory
-Extract the project files (or clone the repository) and open your terminal (Command Prompt, PowerShell, or Bash) inside the `Taka_Bachai` folder:
+You do **not** need to install Maven separately — the project ships with the Maven Wrapper (`mvnw` / `mvnw.cmd`).
+
+You do **not** need Node.js — the frontend is plain HTML / CSS / JavaScript served by Spring Boot.
+
+Verify Java is on your PATH:
+
+```bash
+java -version
+```
+
+You should see `21` (or higher).
+
+---
+
+## 2. Run locally (recommended for development / demos)
+
+### Step 1 — Open a terminal in the project root
+
 ```bash
 cd path/to/Taka_Bachai
 ```
 
-### Step 2: Clean and Build Dependencies
-Run the following command to download all necessary Spring Boot dependencies (this requires an active internet connection and may take a few minutes the first time):
+### Step 2 — Build dependencies (first run only)
 
-**On Windows:**
-```cmd
+**Windows (PowerShell or cmd):**
+```bat
 .\mvnw.cmd clean install -DskipTests
 ```
 
-**On Mac / Linux:**
+**macOS / Linux:**
 ```bash
 ./mvnw clean install -DskipTests
 ```
 
-### Step 3: Launch the Application
-Once the build is successful, you can start the Spring Boot server:
+### Step 3 — Launch the server
 
-**On Windows:**
-```cmd
+**Windows:**
+```bat
 .\mvnw.cmd spring-boot:run
 ```
 
-**On Mac / Linux:**
+**macOS / Linux:**
 ```bash
 ./mvnw spring-boot:run
 ```
 
-*(Alternative: If the wrapper scripts fail on your system, you can manually install [Apache Maven](https://maven.apache.org/download.cgi) and simply run `mvn spring-boot:run`)*.
+When you see `Started TakaBachaiApplication in X.XXX seconds`, open **<http://localhost:8080>**.
+
+> If the wrapper scripts fail (e.g. on a locked-down Windows machine), install [Apache Maven](https://maven.apache.org/download.cgi) and run `mvn spring-boot:run` instead.
 
 ---
 
-## Accessing the Application
+## 3. Run as a JAR (for production-like local testing)
 
-Once the terminal output shows `Started TakaBachaiApplication in ... seconds`, the server is successfully running.
+```bash
+./mvnw clean package -DskipTests
+java -jar target/taka-bachai-0.0.1-SNAPSHOT.jar
+```
 
-1. Open any modern web browser (Chrome, Edge, Firefox).
-2. Navigate to: **[http://localhost:8080](http://localhost:8080)**
-3. You will see the Taka Bachai homepage.
-4. **Login:** There are 10 pre-configured accounts. Select an account from the dropdown menu (e.g., "Rahim Uddin") and click "Enter Dashboard".
-   * *Note: The first user (Rahim Uddin) is configured as the **Admin** and will have access to the Admin Panel in the sidebar.*
+To run the production profile (no H2 console, quiet logs):
+
+```bash
+SPRING_PROFILES_ACTIVE=prod java -jar target/taka-bachai-0.0.1-SNAPSHOT.jar
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE="prod"; java -jar target\taka-bachai-0.0.1-SNAPSHOT.jar
+```
 
 ---
 
-## Database Configuration (H2 In-Memory)
+## 4. Run with Docker
 
-By default, the application is configured to use the **H2 In-Memory Database** for ease of use.
-* **Seeding:** The database is automatically created and populated with sample data every time you launch the application. This is controlled by `schema.sql` and `data.sql` located in `src/main/resources/`.
-* **Data Persistence:** Because it is an in-memory database, **any new data you enter (new users, transactions) will be wiped out when you restart the server.** This is ideal for university presentations as you always start with a clean state.
-* **H2 Console:** You can inspect the database tables manually by going to `http://localhost:8080/h2-console` in your browser. 
-   - JDBC URL: `jdbc:h2:mem:takabachaidb`
-   - Username: `sa`
-   - Password: *(leave blank)*
+The repository contains a multi-stage `Dockerfile` that produces a slim runtime image and respects the `$PORT` environment variable used by Render, Railway and Fly.io.
+
+```bash
+docker build -t taka-bachai .
+docker run --rm -p 8080:8080 taka-bachai
+```
+
+To deploy on **Render**:
+
+1. Push the repo to GitHub.
+2. Create a new *Web Service* on Render, selecting "Deploy from a Dockerfile".
+3. Render automatically supplies `PORT`, and the Dockerfile already sets `SPRING_PROFILES_ACTIVE=prod`.
+4. (Optional) add `APP_UPLOAD_DIR=/var/data/uploads` and a Render disk to persist receipts across restarts.
+
+---
+
+## 5. Accessing the application
+
+1. Open any modern browser (Chrome, Edge, Firefox, Safari).
+2. Visit <http://localhost:8080>.
+3. The home page lists 10 pre-seeded users. Pick one and click **Enter Dashboard**.
+4. The first user (Rahim Uddin) is the **admin** and has access to the *Admin* panel in the sidebar.
+
+---
+
+## 6. Database
+
+By default the app runs an **H2 in-memory** database in PostgreSQL compatibility mode.
+
+- The schema is created from `src/main/resources/schema.sql`.
+- Sample data is loaded from `src/main/resources/data.sql`.
+- Data is reset on every restart — ideal for demos and presentations.
+
+### H2 console (dev profile only)
+
+The H2 console is available at <http://localhost:8080/h2-console> when running with the `dev` profile (the default).
+
+| Field | Value |
+|-------|-------|
+| JDBC URL | `jdbc:h2:mem:takabachaidb` |
+| User name | `sa` |
+| Password | *(leave blank)* |
+
+### Switch to PostgreSQL or Supabase
+
+Open `src/main/resources/application.properties`, comment out the H2 block and uncomment the PostgreSQL block. Provide your own `spring.datasource.url`, `spring.datasource.username`, and `spring.datasource.password`. Because the SQL files are PostgreSQL-syntax (`BIGSERIAL`, `BOOLEAN`, etc.) the same `schema.sql` / `data.sql` work unchanged.
+
+---
+
+## 7. Configuration reference
+
+| Property / Env var          | Default               | Description |
+|-----------------------------|-----------------------|-------------|
+| `SERVER_PORT` / `PORT`      | `8080`                | HTTP port. Render injects `PORT`. |
+| `SPRING_PROFILES_ACTIVE`    | `dev`                 | `dev` or `prod`. |
+| `APP_UPLOAD_DIR`            | `./uploads`           | Where receipt images are stored. |
+
+---
+
+## 8. Troubleshooting
+
+| Symptom | Fix |
+|--------|-----|
+| `Port 8080 already in use` | `SERVER_PORT=8081 ./mvnw spring-boot:run` (or stop the other process). |
+| Receipts not saving | Make sure the user running Java has write access to `APP_UPLOAD_DIR`. |
+| Browser shows old assets after a code change | Hard reload (`Ctrl+F5` / `Cmd+Shift+R`) — the static files are cached aggressively in some browsers. |
+| Build fails with *Unsupported class file major version* | You're running an older JDK; install Java 21 and ensure `JAVA_HOME` points to it. |
+| In dev profile, `/h2-console` returns 404 | The app may have started under the `prod` profile. Restart with `SPRING_PROFILES_ACTIVE=dev`. |

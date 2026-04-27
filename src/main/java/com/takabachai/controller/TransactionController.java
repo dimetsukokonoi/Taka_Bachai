@@ -1,5 +1,6 @@
 package com.takabachai.controller;
 
+import com.takabachai.exception.BadRequestException;
 import com.takabachai.model.Transaction;
 import com.takabachai.service.TransactionService;
 import jakarta.validation.Valid;
@@ -12,13 +13,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/transactions")
-@CrossOrigin(origins = "*")
 public class TransactionController {
 
     private final TransactionService transactionService;
@@ -44,10 +48,13 @@ public class TransactionController {
 
     @PostMapping
     public Transaction createTransaction(@Valid @RequestBody Transaction transaction) {
-        if (transaction.getTransactionDate() == null) {
-            transaction.setTransactionDate(LocalDateTime.now());
-        }
         return transactionService.createTransaction(transaction);
+    }
+
+    @PutMapping("/{id}")
+    public Transaction updateTransaction(@PathVariable Long id,
+                                         @Valid @RequestBody Transaction transaction) {
+        return transactionService.updateTransaction(id, transaction);
     }
 
     @DeleteMapping("/{id}")
@@ -56,7 +63,6 @@ public class TransactionController {
         return ResponseEntity.noContent().build();
     }
 
-    // Search transactions
     @GetMapping("/user/{userId}/search")
     public List<Transaction> searchTransactions(
             @PathVariable Long userId,
@@ -66,39 +72,70 @@ public class TransactionController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
 
-        if (keyword != null && !keyword.isEmpty()) {
-            return transactionService.searchTransactions(userId, keyword);
+        // Combinable filters: start with the broadest source, then narrow down.
+        List<Transaction> result;
+        if (startDate != null && endDate != null && !startDate.isBlank() && !endDate.isBlank()) {
+            result = transactionService.getTransactionsByDateRange(userId,
+                    parseDateTime(startDate, true),
+                    parseDateTime(endDate, false));
+        } else {
+            result = transactionService.getTransactionsByUserId(userId);
         }
-        if (type != null && !type.isEmpty()) {
-            return transactionService.getTransactionsByType(userId, type);
+
+        if (type != null && !type.isBlank()) {
+            String t = type.toUpperCase();
+            result = result.stream().filter(tx -> t.equals(tx.getType())).collect(Collectors.toList());
         }
         if (categoryId != null) {
-            return transactionService.getTransactionsByCategory(userId, categoryId);
+            result = result.stream()
+                    .filter(tx -> categoryId.equals(tx.getCategoryId()))
+                    .collect(Collectors.toList());
         }
-        if (startDate != null && endDate != null) {
-            return transactionService.getTransactionsByDateRange(userId,
-                    LocalDateTime.parse(startDate),
-                    LocalDateTime.parse(endDate));
+        if (keyword != null && !keyword.isBlank()) {
+            String k = keyword.toLowerCase();
+            result = result.stream()
+                    .filter(tx -> tx.getDescription() != null && tx.getDescription().toLowerCase().contains(k))
+                    .collect(Collectors.toList());
         }
-        return transactionService.getTransactionsByUserId(userId);
+        return new ArrayList<>(result);
     }
 
-    // Upload receipt
     @PostMapping("/{id}/receipt")
     public ResponseEntity<Transaction> uploadReceipt(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file) throws IOException {
+
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("Receipt file is empty");
+        }
 
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String original = file.getOriginalFilename() == null ? "receipt" : file.getOriginalFilename();
+        String filename = UUID.randomUUID() + "_" + original.replaceAll("[^a-zA-Z0-9._-]", "_");
         Path filePath = uploadPath.resolve(filename);
         Files.copy(file.getInputStream(), filePath);
 
         Transaction updated = transactionService.updateReceiptPath(id, filePath.toString());
         return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * Robustly parse either a date (YYYY-MM-DD) or full ISO date-time.
+     */
+    private LocalDateTime parseDateTime(String raw, boolean startOfDay) {
+        try {
+            return LocalDateTime.parse(raw);
+        } catch (DateTimeParseException ignore) {
+            try {
+                LocalDate date = LocalDate.parse(raw);
+                return startOfDay ? date.atStartOfDay() : date.atTime(23, 59, 59);
+            } catch (DateTimeParseException e) {
+                throw new BadRequestException("Invalid date format: " + raw);
+            }
+        }
     }
 }
