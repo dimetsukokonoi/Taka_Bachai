@@ -107,3 +107,57 @@ CREATE INDEX IF NOT EXISTS idx_budgets_user_month ON budgets(user_id, budget_mon
 CREATE INDEX IF NOT EXISTS idx_recurring_bills_user ON recurring_bills(user_id);
 CREATE INDEX IF NOT EXISTS idx_financial_goals_user ON financial_goals(user_id);
 CREATE INDEX IF NOT EXISTS idx_debts_loans_user ON debts_loans(user_id);
+
+-- =============================================
+-- Complex SQL Queries for Course Requirements (Views)
+-- =============================================
+
+-- 1. Outer Join & Subqueries
+-- View: User Financial Summary
+-- Demonstrates LEFT OUTER JOIN and nested aggregate subqueries
+CREATE OR REPLACE VIEW vw_user_financial_summary AS
+SELECT 
+    u.id, 
+    u.full_name, 
+    u.email, 
+    u.role, 
+    COALESCE(w_agg.total_balance, 0) AS total_balance, 
+    COALESCE(d_agg.total_debt, 0) AS total_debt
+FROM users u
+LEFT OUTER JOIN (
+    SELECT user_id, SUM(balance) AS total_balance 
+    FROM wallets 
+    GROUP BY user_id
+) w_agg ON u.id = w_agg.user_id
+LEFT OUTER JOIN (
+    SELECT user_id, SUM(amount) AS total_debt 
+    FROM debts_loans 
+    GROUP BY user_id
+) d_agg ON u.id = d_agg.user_id;
+
+-- 2. Inner Join & Nested Subqueries (HAVING clause)
+-- View: Spending Insights vs Platform Average
+-- Demonstrates INNER JOIN between transactions and categories, and nested subqueries
+CREATE OR REPLACE VIEW vw_spending_insights AS
+SELECT 
+    t.user_id,
+    c.name AS category_name, 
+    SUM(t.amount) AS user_spending,
+    (SELECT AVG(total_spent) FROM (
+        SELECT user_id, SUM(amount) AS total_spent 
+        FROM transactions 
+        WHERE category_id = c.id AND type = 'EXPENSE' 
+        GROUP BY user_id
+    ) AS user_avgs) AS average_spending
+FROM transactions t
+INNER JOIN categories c ON t.category_id = c.id
+WHERE t.type = 'EXPENSE'
+GROUP BY t.user_id, c.id, c.name
+HAVING SUM(t.amount) > (
+    SELECT AVG(total_spent) FROM (
+        SELECT user_id, SUM(amount) AS total_spent 
+        FROM transactions 
+        WHERE category_id = c.id AND type = 'EXPENSE' 
+        GROUP BY user_id
+    ) AS user_avgs2
+);
