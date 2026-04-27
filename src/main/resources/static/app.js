@@ -9,7 +9,8 @@ let wallets = [];
 let debts = [];
 let allUsers = [];
 let netWorthChartInstance = null;
-
+let summaryMode = 'totals';
+let latestSummaryData = null;
 const pageMeta = {
     'dashboard': { t: 'Dashboard', a: '' },
     'accounts': { t: 'Accounts', a: '<button class="btn btn-outline" onclick="loadAccounts()"><i class="ph ph-arrows-clockwise"></i> Refresh all</button><button class="btn btn-orange" onclick="showAddWallet()">+ Add account</button>' },
@@ -260,6 +261,15 @@ function renderAccountsCol(groups) {
 }
 
 function renderSummaryCol(aTot, lTot, cash, inv, cc, loan) {
+    latestSummaryData = [aTot, lTot, cash, inv, cc, loan];
+    
+    const fmt = (val, total) => {
+        if (summaryMode === 'percent') {
+            return total > 0 ? (val / total * 100).toFixed(1) + '%' : '0%';
+        }
+        return '৳' + formatNum(val);
+    };
+
     document.getElementById('sumAssetsVal').innerText = '৳' + formatNum(aTot);
 
     const assetData = [
@@ -269,7 +279,7 @@ function renderSummaryCol(aTot, lTot, cash, inv, cc, loan) {
 
     const aTotal = assetData.reduce((s, x) => s + x.v, 0) || 1;
     document.getElementById('assetBarMulti').innerHTML = assetData.map(d => `<div style="width:${(d.v / aTotal) * 100}%; background:${d.c}"></div>`).join('');
-    document.getElementById('assetBreakdown').innerHTML = assetData.map(d => `<div class="summary-legend-row"><div class="legend-label"><div class="legend-dot" style="background:${d.c}"></div> ${d.l}</div><div>৳${formatNum(d.v)}</div></div>`).join('');
+    document.getElementById('assetBreakdown').innerHTML = assetData.map(d => `<div class="summary-legend-row"><div class="legend-label"><div class="legend-dot" style="background:${d.c}"></div> ${d.l}</div><div style="font-weight: 500">${fmt(d.v, aTot)}</div></div>`).join('');
 
     const liabData = [
         { l: 'Loans', v: loan, c: '#eab308' },
@@ -279,7 +289,14 @@ function renderSummaryCol(aTot, lTot, cash, inv, cc, loan) {
     const lTotal = liabData.reduce((s, x) => s + x.v, 0) || 1;
     document.getElementById('sumLiabsVal').innerText = '৳' + formatNum(lTotal);
     document.getElementById('liabBarMulti').innerHTML = liabData.map(d => `<div style="width:${(d.v / lTotal) * 100}%; background:${d.c}"></div>`).join('');
-    document.getElementById('liabBreakdown').innerHTML = liabData.map(d => `<div class="summary-legend-row"><div class="legend-label"><div class="legend-dot" style="background:${d.c}"></div> ${d.l}</div><div>৳${formatNum(d.v)}</div></div>`).join('');
+    document.getElementById('liabBreakdown').innerHTML = liabData.map(d => `<div class="summary-legend-row"><div class="legend-label"><div class="legend-dot" style="background:${d.c}"></div> ${d.l}</div><div style="font-weight: 500">${fmt(d.v, lTot)}</div></div>`).join('');
+}
+
+function toggleSummaryMode(mode) {
+    summaryMode = mode;
+    document.getElementById('btnSumTotals').classList.toggle('active', mode === 'totals');
+    document.getElementById('btnSumPercent').classList.toggle('active', mode === 'percent');
+    if (latestSummaryData) renderSummaryCol(...latestSummaryData);
 }
 
 function drawSparkline(id) {
@@ -484,9 +501,16 @@ async function submitGoal() {
     closeModal(); loadGenericModule('goals');
 }
 async function addToGoal(id) {
-    const amount = prompt('Amount to add (৳):');
-    if (!amount || isNaN(amount)) return;
-    await fetch(`${API}/api/goals/${id}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: parseFloat(amount) }) });
+    showModal('Contribute to Goal', `
+        <div class="group"><label>Amount (৳)</label><input class="input" type="number" id="gfAddAmt" placeholder="e.g. 5000"></div>
+        <div class="actions"><button class="btn btn-orange" onclick="submitAddToGoal(${id})">Add Funds</button></div>
+    `);
+}
+async function submitAddToGoal(id) {
+    const amount = parseFloat(document.getElementById('gfAddAmt').value);
+    if (!amount || isNaN(amount) || amount <= 0) return;
+    await fetch(`${API}/api/goals/${id}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount }) });
+    closeModal();
     loadGenericModule('goals');
 }
 
@@ -505,13 +529,20 @@ async function submitDebt() {
     closeModal(); loadGenericModule('debts');
 }
 async function makePayment(id) {
-    const amount = prompt('Payment amount (৳):');
-    if (!amount || isNaN(amount)) return;
-    await fetch(`${API}/api/debts/${id}/pay`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: parseFloat(amount) }) });
+    showModal('Make Payment', `
+        <div class="group"><label>Payment Amount (৳)</label><input class="input" type="number" id="dfPayAmt" placeholder="e.g. 2000"></div>
+        <div class="actions"><button class="btn btn-orange" onclick="submitMakePayment(${id})">Submit Payment</button></div>
+    `);
+}
+async function submitMakePayment(id) {
+    const amount = parseFloat(document.getElementById('dfPayAmt').value);
+    if (!amount || isNaN(amount) || amount <= 0) return;
+    await fetch(`${API}/api/debts/${id}/pay`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount }) });
+    closeModal();
     loadGenericModule('debts');
 }
 
-async function loadReport() { loadGenericModule('reports'); }
+async function loadReport() { window.print(); }
 
 // ===== UTILS =====
 function formatNum(n) { return parseFloat(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
