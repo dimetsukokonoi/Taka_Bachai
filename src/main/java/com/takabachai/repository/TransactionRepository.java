@@ -43,12 +43,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
 
-    @Query(value = "SELECT c.name AS categoryName, SUM(t.amount) AS userSpending, " +
-            "(SELECT AVG(total_spent) FROM (SELECT user_id, SUM(amount) AS total_spent FROM transactions WHERE category_id = c.id AND type = 'EXPENSE' GROUP BY user_id) AS user_avgs) AS averageSpending " +
-            "FROM transactions t " +
-            "INNER JOIN categories c ON t.category_id = c.id " +
-            "WHERE t.user_id = :userId AND t.type = 'EXPENSE' " +
-            "GROUP BY c.id, c.name " +
-            "HAVING SUM(t.amount) > (SELECT AVG(total_spent) FROM (SELECT user_id, SUM(amount) AS total_spent FROM transactions WHERE category_id = c.id AND type = 'EXPENSE' GROUP BY user_id) AS user_avgs2)", nativeQuery = true)
+    @Query(value = "SELECT category_name AS categoryName, user_spending AS userSpending, average_spending AS averageSpending " +
+            "FROM vw_spending_insights WHERE user_id = :userId", nativeQuery = true)
     java.util.List<com.takabachai.dto.CategoryInsightDTO> getSpendingInsights(@Param("userId") Long userId);
 }

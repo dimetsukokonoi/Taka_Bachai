@@ -264,21 +264,19 @@ SELECT
     t.user_id,
     c.name AS category_name, 
     SUM(t.amount) AS user_spending,
-    (SELECT AVG(total_spent) FROM (
-        SELECT user_id, SUM(amount) AS total_spent 
-        FROM transactions 
-        WHERE category_id = c.id AND type = 'EXPENSE' 
-        GROUP BY user_id
-    ) AS user_avgs) AS average_spending
+    ca.average_spending
 FROM transactions t
 INNER JOIN categories c ON t.category_id = c.id
-WHERE t.type = 'EXPENSE'
-GROUP BY t.user_id, c.id, c.name
-HAVING SUM(t.amount) > (
-    SELECT AVG(total_spent) FROM (
-        SELECT user_id, SUM(amount) AS total_spent 
+INNER JOIN (
+    SELECT category_id, AVG(total_spent) AS average_spending
+    FROM (
+        SELECT user_id, category_id, SUM(amount) AS total_spent 
         FROM transactions 
-        WHERE category_id = c.id AND type = 'EXPENSE' 
-        GROUP BY user_id
-    ) AS user_avgs2
-);
+        WHERE type = 'EXPENSE' 
+        GROUP BY user_id, category_id
+    ) AS user_totals
+    GROUP BY category_id
+) ca ON c.id = ca.category_id
+WHERE t.type = 'EXPENSE'
+GROUP BY t.user_id, c.id, c.name, ca.average_spending
+HAVING SUM(t.amount) > ca.average_spending;
