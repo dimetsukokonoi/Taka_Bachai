@@ -59,6 +59,16 @@ Provides a high-level summary of the user's financial health and monthly perform
 * **Monthly Aggregation:** The "Reports" tab automatically calculates the Total Income, Total Expense, and Net Savings for the current month.
 * **Financial Health Indicators:** If Net Savings is positive, it renders in green. If expenses exceed income, the deficit is highlighted in red, warning the user of bad financial habits.
 
+## 11. <mark>Advanced Admin Financial Summary (Complex SQL: OUTER JOIN & Subqueries)</mark>
+An advanced data aggregation feature built specifically for platform administrators.
+* **Global Wealth & Debt Overview:** The Admin Panel doesn't just list users; it dynamically calculates the total combined wallet balance and total outstanding debts for every single user in the system.
+* **Complex Data Mapping:** Powered by highly complex `LEFT OUTER JOIN`s on nested aggregated `Subqueries` to ensure data integrity (preventing cartesian products when users have multiple wallets and debts simultaneously).
+
+## 12. <mark>Spending Insights vs. Platform Average (Complex SQL: INNER JOIN & Subqueries)</mark>
+An intelligent financial analytics tool available to all users in their Reports dashboard.
+* **Behavioral Warnings:** Analyzes a user's spending habits and explicitly warns them if they are spending significantly more in a specific category compared to the average user on the platform.
+* **Advanced Querying:** Driven by a native `INNER JOIN` between the transactions and categories tables, utilizing deeply nested `Subqueries` in the `SELECT` and `HAVING` clauses to calculate the dynamic platform-wide averages on the fly.
+
 ---
 
 ### Technical Highlights (For Faculty Questions)

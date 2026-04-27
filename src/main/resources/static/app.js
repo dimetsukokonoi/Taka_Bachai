@@ -356,22 +356,46 @@ async function loadGenericModule(page) {
                         <div class="${netClass}" style="font-size:1.5rem; font-weight:700;">৳${formatNum(r.netSavings)}</div>
                     </div>
                 </div>
-                <div style="font-size:0.85rem; color:var(--text-muted)">Report for <strong>${month}</strong> — ${r.transactionCount} transactions processed</div>
+                <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 24px;">Report for <strong>${month}</strong> — ${r.transactionCount} transactions processed</div>
             `;
+            
+            // Fetch and render spending insights (Complex SQL Feature)
+            const insightsRes = await fetch(`${API}/api/reports/user/${currentUserId}/insights`);
+            const insights = await insightsRes.json();
+            
+            let insightsHtml = `<div style="background:#fff3cd; border:1px solid #ffeeba; border-radius:12px; padding:20px; margin-top:32px;">
+                <h3 style="color:#856404; margin:0 0 16px 0; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+                    <i class="ph ph-warning-circle"></i> Spending Insights (vs. Platform Average)
+                </h3>`;
+            
+            if (insights && insights.length > 0) {
+                insightsHtml += `<ul style="margin:0; padding-left:20px; color:#856404; line-height:1.6;">`;
+                insights.forEach(insight => {
+                    insightsHtml += `<li>You spent <strong>৳${formatNum(insight.userSpending)}</strong> on <strong>${insight.categoryName}</strong>, which is higher than the platform average of <strong>৳${formatNum(insight.averageSpending)}</strong>!</li>`;
+                });
+                insightsHtml += `</ul>`;
+            } else {
+                insightsHtml += `<p style="margin:0; color:#856404; font-size:0.9rem;">Great job! Your spending is well below the platform average across all categories.</p>`;
+            }
+            insightsHtml += `</div>`;
+            
+            section.innerHTML += insightsHtml;
+
         } else if (page === 'admin') {
-            thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Action</th></tr>`;
-            const res = await fetch(`${API}/api/users`);
+            thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Total Balance</th><th>Total Debt</th><th>Action</th></tr>`;
+            const res = await fetch(`${API}/api/users/admin/summary`);
             const all = await res.json();
             tbody.innerHTML = all.map(u => `<tr>
                 <td style="color:var(--text-muted)">#${u.id}</td>
                 <td style="font-weight:500">${u.fullName}</td>
                 <td>${u.email}</td>
-                <td>${u.phone || '—'}</td>
                 <td><span style="padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; background:${u.role === 'ADMIN' ? 'var(--orange)' : '#e5e7eb'}; color:${u.role === 'ADMIN' ? '#fff' : 'var(--text-muted)'}">${u.role}</span></td>
+                <td style="font-weight:600; color:var(--green)">৳${formatNum(u.totalBalance)}</td>
+                <td style="font-weight:600; color:var(--red)">৳${formatNum(u.totalDebt)}</td>
                 <td>
                     <button class="btn btn-outline" onclick="deleteUser(${u.id})" style="font-size:0.75rem;padding:4px 10px; color:var(--red); border-color:var(--red)">Delete</button>
                 </td>
-            </tr>`).join('') || '<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--text-muted)">No users found.</td></tr>';
+            </tr>`).join('') || '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--text-muted)">No users found.</td></tr>';
         }
     } catch (e) { console.error('Module load error:', e); }
 }

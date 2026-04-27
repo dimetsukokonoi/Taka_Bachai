@@ -24,6 +24,10 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public List<com.takabachai.dto.UserSummaryDTO> getUserFinancialSummaries() {
+        return userRepository.getUserFinancialSummaries();
+    }
+
     public User createUser(User user) {
         return userRepository.save(user);
     }

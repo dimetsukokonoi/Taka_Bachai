@@ -20,4 +20,9 @@ public class ReportController {
     public Map<String, Object> getMonthlyReport(@PathVariable Long userId, @PathVariable String month) {
         return reportService.getMonthlyReport(userId, month);
     }
+
+    @GetMapping("/user/{userId}/insights")
+    public java.util.List<com.takabachai.dto.CategoryInsightDTO> getSpendingInsights(@PathVariable Long userId) {
+        return reportService.getSpendingInsights(userId);
+    }
 }

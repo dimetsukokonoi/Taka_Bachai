@@ -24,6 +24,11 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @GetMapping("/admin/summary")
+    public List<com.takabachai.dto.UserSummaryDTO> getUserFinancialSummaries() {
+        return userService.getUserFinancialSummaries();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)

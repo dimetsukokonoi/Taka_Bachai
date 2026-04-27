@@ -67,4 +67,8 @@ public class ReportService {
 
         return report;
     }
+
+    public List<com.takabachai.dto.CategoryInsightDTO> getSpendingInsights(Long userId) {
+        return transactionRepository.getSpendingInsights(userId);
+    }
 }
