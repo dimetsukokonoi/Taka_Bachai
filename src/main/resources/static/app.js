@@ -7,6 +7,7 @@ let currentUserId = 1;
 let categories = [];
 let wallets = [];
 let debts = [];
+let allUsers = [];
 let netWorthChartInstance = null;
 
 const pageMeta = {
@@ -17,7 +18,8 @@ const pageMeta = {
     'bills': { t: 'Recurring', a: '<button class="btn btn-orange" onclick="showAddBill()">+ Add bill</button>' },
     'goals': { t: 'Goals', a: '<button class="btn btn-orange" onclick="showAddGoal()">+ Add goal</button>' },
     'debts': { t: 'Loans', a: '<button class="btn btn-orange" onclick="showAddDebt()">+ Log record</button>' },
-    'reports': { t: 'Reports', a: '<button class="btn btn-orange" onclick="loadReport()"><i class="ph ph-chart-bar"></i> Generate</button>' }
+    'reports': { t: 'Reports', a: '<button class="btn btn-orange" onclick="loadReport()"><i class="ph ph-chart-bar"></i> Generate</button>' },
+    'admin': { t: 'Admin Panel', a: '<button class="btn btn-orange" onclick="showAddUser()">+ Add User</button>' }
 };
 
 // ===== INIT =====
@@ -55,14 +57,29 @@ function enterDashboard() {
 async function loadDashboardUsers() {
     try {
         const res = await fetch(`${API}/api/users`);
-        const users = await res.json();
+        allUsers = await res.json();
+        
+        // Show admin panel link if current user is ADMIN
+        const currentUser = allUsers.find(u => u.id === currentUserId);
+        const navAdmin = document.getElementById('navAdmin');
+        if (currentUser && currentUser.role === 'ADMIN') {
+            if (navAdmin) navAdmin.style.display = 'flex';
+        } else {
+            if (navAdmin) navAdmin.style.display = 'none';
+        }
+
         const select = document.getElementById('userSelect');
-        select.innerHTML = users.map(u =>
+        select.innerHTML = allUsers.map(u =>
             `<option value="${u.id}" ${u.id === currentUserId ? 'selected' : ''}>${u.fullName}</option>`
         ).join('');
-        select.addEventListener('change', e => {
+        
+        // Remove old listener to avoid duplicates if called again
+        const newSelect = select.cloneNode(true);
+        select.parentNode.replaceChild(newSelect, select);
+        
+        newSelect.addEventListener('change', e => {
             currentUserId = parseInt(e.target.value);
-            loadAccounts();
+            loadDashboardUsers(); // Reload to check admin role
         });
 
         await fetchCategories();
@@ -341,6 +358,20 @@ async function loadGenericModule(page) {
                 </div>
                 <div style="font-size:0.85rem; color:var(--text-muted)">Report for <strong>${month}</strong> — ${r.transactionCount} transactions processed</div>
             `;
+        } else if (page === 'admin') {
+            thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Action</th></tr>`;
+            const res = await fetch(`${API}/api/users`);
+            const all = await res.json();
+            tbody.innerHTML = all.map(u => `<tr>
+                <td style="color:var(--text-muted)">#${u.id}</td>
+                <td style="font-weight:500">${u.fullName}</td>
+                <td>${u.email}</td>
+                <td>${u.phone || '—'}</td>
+                <td><span style="padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; background:${u.role === 'ADMIN' ? 'var(--orange)' : '#e5e7eb'}; color:${u.role === 'ADMIN' ? '#fff' : 'var(--text-muted)'}">${u.role}</span></td>
+                <td>
+                    <button class="btn btn-outline" onclick="deleteUser(${u.id})" style="font-size:0.75rem;padding:4px 10px; color:var(--red); border-color:var(--red)">Delete</button>
+                </td>
+            </tr>`).join('') || '<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--text-muted)">No users found.</td></tr>';
         }
     } catch (e) { console.error('Module load error:', e); }
 }
@@ -462,3 +493,36 @@ async function loadReport() { loadGenericModule('reports'); }
 function formatNum(n) { return parseFloat(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function formatDate(dStr) { if (!dStr) return '—'; return new Date(dStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
 function getCategoryName(id) { const c = categories.find(c => c.id === id); return c ? c.name : 'Uncategorized'; }
+
+// ===== ADMIN MODULE =====
+function showAddUser() {
+    showModal('Add User', `
+        <div class="group"><label>Full Name</label><input class="input" id="ufName" placeholder="e.g. John Doe"></div>
+        <div class="group"><label>Email</label><input class="input" type="email" id="ufEmail" placeholder="john@example.com"></div>
+        <div class="group"><label>Phone</label><input class="input" id="ufPhone" placeholder="01712345678"></div>
+        <div class="group"><label>Role</label><select class="input" id="ufRole"><option value="USER">User</option><option value="ADMIN">Admin</option></select></div>
+        <div class="actions"><button class="btn btn-orange" onclick="submitUser()">Save User</button></div>
+    `);
+}
+async function submitUser() {
+    const payload = {
+        fullName: document.getElementById('ufName').value,
+        email: document.getElementById('ufEmail').value,
+        phone: document.getElementById('ufPhone').value,
+        role: document.getElementById('ufRole').value
+    };
+    await fetch(`${API}/api/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    closeModal(); 
+    loadDashboardUsers(); // Refresh global user list
+    loadGenericModule('admin'); // Refresh table
+}
+async function deleteUser(id) {
+    if (id === currentUserId) {
+        alert("You cannot delete yourself.");
+        return;
+    }
+    if (!confirm("Are you sure you want to delete this user? All their data will be lost.")) return;
+    await fetch(`${API}/api/users/${id}`, { method: 'DELETE' });
+    loadDashboardUsers();
+    loadGenericModule('admin');
+}

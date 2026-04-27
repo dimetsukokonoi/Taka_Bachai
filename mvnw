@@ -20,7 +20,8 @@ if [ ! -d "$MAVEN_HOME" ]; then
     echo "Downloading Maven distribution..."
     mkdir -p "$MAVEN_HOME"
     curl -sL "$DIST_URL" -o "/tmp/maven-dist.zip"
-    unzip -qo "/tmp/maven-dist.zip" -d "$MAVEN_HOME"
+    cd "$MAVEN_HOME"
+    jar xf "/tmp/maven-dist.zip"
     rm -f "/tmp/maven-dist.zip"
 fi
 

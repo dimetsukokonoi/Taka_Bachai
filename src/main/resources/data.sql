@@ -3,26 +3,26 @@
 -- =============================================
 
 -- ========== USERS (10 Bangladeshi Users) ==========
-INSERT INTO users (id, full_name, email, phone) VALUES
-(1, 'Rahim Uddin', 'rahim.uddin@email.com', '01711234567');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(2, 'Fatema Akter', 'fatema.akter@email.com', '01812345678');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(3, 'Kamal Hossain', 'kamal.hossain@email.com', '01913456789');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(4, 'Nusrat Jahan', 'nusrat.jahan@email.com', '01614567890');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(5, 'Arif Rahman', 'arif.rahman@email.com', '01515678901');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(6, 'Tasnia Islam', 'tasnia.islam@email.com', '01916789012');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(7, 'Shahed Alam', 'shahed.alam@email.com', '01717890123');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(8, 'Mithila Sarker', 'mithila.sarker@email.com', '01818901234');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(9, 'Jubayer Ahmed', 'jubayer.ahmed@email.com', '01319012345');
-INSERT INTO users (id, full_name, email, phone) VALUES
-(10, 'Rabeya Khatun', 'rabeya.khatun@email.com', '01420123456');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(1, 'Rahim Uddin', 'rahim.uddin@email.com', '01711234567', 'ADMIN');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(2, 'Fatema Akter', 'fatema.akter@email.com', '01812345678', 'USER');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(3, 'Kamal Hossain', 'kamal.hossain@email.com', '01913456789', 'USER');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(4, 'Nusrat Jahan', 'nusrat.jahan@email.com', '01614567890', 'USER');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(5, 'Arif Rahman', 'arif.rahman@email.com', '01515678901', 'USER');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(6, 'Tasnia Islam', 'tasnia.islam@email.com', '01916789012', 'USER');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(7, 'Shahed Alam', 'shahed.alam@email.com', '01717890123', 'USER');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(8, 'Mithila Sarker', 'mithila.sarker@email.com', '01818901234', 'USER');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(9, 'Jubayer Ahmed', 'jubayer.ahmed@email.com', '01319012345', 'USER');
+INSERT INTO users (id, full_name, email, phone, role) VALUES
+(10, 'Rabeya Khatun', 'rabeya.khatun@email.com', '01420123456', 'USER');
 
 -- ========== CATEGORIES ==========
 INSERT INTO categories (id, name, type, icon, color) VALUES (1, 'Salary', 'INCOME', '💰', '#4CAF50');
