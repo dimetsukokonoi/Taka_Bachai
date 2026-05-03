@@ -74,9 +74,23 @@ The Dockerfile already sets `SPRING_PROFILES_ACTIVE=prod` by default.
 
 ---
 
-## Switching to PostgreSQL / Supabase
+## Host database on Supabase
 
-Open `src/main/resources/application.properties` and uncomment the PostgreSQL block, supplying your connection details. The schema and seed data files (`schema.sql`, `data.sql`) are written in PostgreSQL syntax (`BIGSERIAL`, `BOOLEAN DEFAULT TRUE`, etc.) so they work unchanged.
+1. Create a Supabase project and open `Project Settings -> Database`.
+2. Copy the host, port, database, user, and password.
+3. Set runtime env vars for this app:
+
+```bash
+SPRING_PROFILES_ACTIVE=prod
+SUPABASE_DB_JDBC_URL="jdbc:postgresql://db.<project-ref>.supabase.co:5432/postgres?sslmode=require"
+SUPABASE_DB_USER="postgres"
+SUPABASE_DB_PASSWORD="<your-db-password>"
+```
+
+4. Initialize the database schema once in Supabase SQL Editor by running `src/main/resources/schema.sql`.
+5. (Optional demo data) run `src/main/resources/data.sql` once.
+
+`application-prod.properties` now defaults to `spring.sql.init.mode=never`, so your app will not wipe or re-seed persistent Supabase data on every restart.
 
 ---
 

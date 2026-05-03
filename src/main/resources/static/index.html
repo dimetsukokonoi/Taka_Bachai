@@ -42,9 +42,11 @@
                 <div class="hero-actions">
                     <div class="user-login-box">
                         <label for="homeUserSelect">Select your account to continue</label>
-                        <select id="homeUserSelect" class="home-user-select"></select>
-                        <button class="btn btn-orange btn-lg" onclick="enterDashboard()">
-                            Open Dashboard <i class="ph ph-arrow-right"></i>
+                        <select id="homeUserSelect" class="home-user-select" disabled>
+                            <option>Waking up server (takes ~30s)...</option>
+                        </select>
+                        <button id="homeLoginBtn" class="btn btn-orange btn-lg" onclick="enterDashboard()" disabled>
+                            <i class="ph ph-spinner"></i> Connecting...
                         </button>
                     </div>
                 </div>

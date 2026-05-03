@@ -132,7 +132,21 @@ The H2 console is available at <http://localhost:8080/h2-console> when running w
 
 ### Switch to PostgreSQL or Supabase
 
-Open `src/main/resources/application.properties`, comment out the H2 block and uncomment the PostgreSQL block. Provide your own `spring.datasource.url`, `spring.datasource.username`, and `spring.datasource.password`. Because the SQL files are PostgreSQL-syntax (`BIGSERIAL`, `BOOLEAN`, etc.) the same `schema.sql` / `data.sql` work unchanged.
+1. Create a Supabase project.
+2. Go to **Project Settings -> Database** and copy credentials.
+3. Set these environment variables before starting the app:
+
+```bash
+SPRING_PROFILES_ACTIVE=prod
+SUPABASE_DB_JDBC_URL=jdbc:postgresql://db.<project-ref>.supabase.co:5432/postgres?sslmode=require
+SUPABASE_DB_USER=postgres
+SUPABASE_DB_PASSWORD=<your-db-password>
+```
+
+4. In Supabase SQL Editor, run `src/main/resources/schema.sql` once.
+5. Optional: run `src/main/resources/data.sql` once to load demo records.
+
+`application-prod.properties` sets `spring.sql.init.mode=never` by default so persistent Supabase data is not re-initialized on every restart.
 
 ---
 
@@ -142,6 +156,10 @@ Open `src/main/resources/application.properties`, comment out the H2 block and u
 |-----------------------------|-----------------------|-------------|
 | `SERVER_PORT` / `PORT`      | `8080`                | HTTP port. Render injects `PORT`. |
 | `SPRING_PROFILES_ACTIVE`    | `dev`                 | `dev` or `prod`. |
+| `SUPABASE_DB_JDBC_URL`      | *(none)*              | Supabase PostgreSQL JDBC URL. |
+| `SUPABASE_DB_USER`          | `postgres`            | Supabase DB username. |
+| `SUPABASE_DB_PASSWORD`      | *(none)*              | Supabase DB password. |
+| `SPRING_SQL_INIT_MODE`      | `never` (prod)        | Set `always` only for one-time schema/data bootstrap. |
 | `APP_UPLOAD_DIR`            | `./uploads`           | Where receipt images are stored. |
 
 ---

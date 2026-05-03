@@ -4,7 +4,7 @@
 // API base is empty so requests are relative; the same Spring Boot server
 // hosts both the static frontend and the /api endpoints, which makes the
 // app deployable to Render, Docker or `localhost` with zero config changes.
-const API = '';
+const API = 'https://taka-bachai.onrender.com';
 
 // -------- Global state --------
 let currentUserId = 1;
@@ -99,16 +99,28 @@ function toast(message, type = 'info') {
 // Homepage
 // =============================================
 async function loadHomeUsers() {
+    const homeSelect = document.getElementById('homeUserSelect');
+    const loginBtn = document.getElementById('homeLoginBtn');
     try {
         const users = await api('GET', '/api/users');
-        const homeSelect = document.getElementById('homeUserSelect');
         if (homeSelect) {
             homeSelect.innerHTML = users
                 .map(u => `<option value="${u.id}">${escapeHtml(u.fullName)}</option>`)
                 .join('');
+            homeSelect.disabled = false;
+        }
+        if (loginBtn) {
+            loginBtn.innerHTML = 'Open Dashboard <i class="ph ph-arrow-right"></i>';
+            loginBtn.disabled = false;
         }
     } catch (e) {
         console.error('Error loading users:', e);
+        if (homeSelect) {
+            homeSelect.innerHTML = `<option>Error connecting to server</option>`;
+        }
+        if (loginBtn) {
+            loginBtn.innerHTML = 'Server Offline';
+        }
         toast(`Could not load users: ${e.message}`, 'error');
     }
 }

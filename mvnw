@@ -16,15 +16,31 @@ DIST_URL=$(grep 'distributionUrl' "$MAVEN_WRAPPER_PROPERTIES" | cut -d'=' -f2-)
 DIST_NAME=$(basename "$DIST_URL" .zip)
 MAVEN_HOME="$HOME/.m2/wrapper/dists/$DIST_NAME"
 
-if [ ! -d "$MAVEN_HOME" ]; then
+resolve_mvn() {
+    find "$MAVEN_HOME" -type f -path "*/bin/mvn" 2>/dev/null | head -1
+}
+
+MVN_CMD=$(resolve_mvn)
+
+# Empty dist dir (e.g. previous run used `jar xf` but `jar` was not installed) — redownload.
+if [ -z "$MVN_CMD" ] || [ ! -x "$MVN_CMD" ]; then
     echo "Downloading Maven distribution..."
+    rm -rf "$MAVEN_HOME"
     mkdir -p "$MAVEN_HOME"
-    curl -sL "$DIST_URL" -o "/tmp/maven-dist.zip"
-    cd "$MAVEN_HOME"
-    jar xf "/tmp/maven-dist.zip"
+    curl -fsSL "$DIST_URL" -o "/tmp/maven-dist.zip"
+    if command -v unzip >/dev/null 2>&1; then
+        unzip -oq "/tmp/maven-dist.zip" -d "$MAVEN_HOME"
+    else
+        (cd "$MAVEN_HOME" && jar xf "/tmp/maven-dist.zip")
+    fi
     rm -f "/tmp/maven-dist.zip"
+    MVN_CMD=$(resolve_mvn)
 fi
 
-MVN_CMD=$(find "$MAVEN_HOME" -name "mvn" -path "*/bin/mvn" | head -1)
+if [ -z "$MVN_CMD" ] || [ ! -x "$MVN_CMD" ]; then
+    echo "Maven Wrapper: could not locate bin/mvn under $MAVEN_HOME" >&2
+    exit 1
+fi
+
 export MAVEN_PROJECTBASEDIR
 exec "$MVN_CMD" "$@"
