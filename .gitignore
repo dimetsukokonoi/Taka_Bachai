@@ -28,6 +28,8 @@ uploads/
 # Local env files
 .env
 .env.local
+# Keep .env.example tracked as a template for new contributors
+!.env.example
 
 # Netlify build state (when using Netlify CLI)
 .netlify/
