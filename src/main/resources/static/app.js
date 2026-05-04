@@ -4,7 +4,8 @@
 // API base is empty so requests are relative; the same Spring Boot server
 // hosts both the static frontend and the /api endpoints, which makes the
 // app deployable to Render, Docker or `localhost` with zero config changes.
-const API = 'https://taka-bachai.onrender.com';
+// (Netlify deployments work too — `netlify.toml` proxies /api/* to Render.)
+const API = '';
 
 // -------- Global state --------
 let currentUserId = 1;
