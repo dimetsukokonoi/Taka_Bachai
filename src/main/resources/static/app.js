@@ -38,7 +38,30 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHomeUsers();
     setupNavigation();
     setupGlobalUx();
+    restoreFromHash();
 });
+
+window.addEventListener('hashchange', () => {
+    restoreFromHash();
+});
+
+function restoreFromHash() {
+    const hash = location.hash.replace(/^#/, '');
+    const match = hash.match(/^user\/(\d+)\/(.+)$/);
+    if (match) {
+        currentUserId = parseInt(match[1], 10);
+        const page = match[2];
+        // Show dashboard view
+        document.getElementById('homepage').style.display = 'none';
+        document.getElementById('dashboardApp').style.display = 'flex';
+        loadDashboardUsers().then(() => {
+            const link = document.querySelector(`.nav-item[data-page="${page}"]`);
+            if (link) {
+                showPage(page, link);
+            }
+        });
+    }
+}
 
 function setupGlobalUx() {
     // Close modal on overlay click or Escape.
@@ -131,6 +154,7 @@ function enterDashboard() {
     currentUserId = parseInt(homeSelect.value, 10);
     document.getElementById('homepage').style.display = 'none';
     document.getElementById('dashboardApp').style.display = 'flex';
+    location.hash = `user/${currentUserId}/dashboard`;
     loadDashboardUsers();
 }
 
@@ -152,6 +176,9 @@ async function loadDashboardUsers() {
         // Replace listener safely (no duplicate handlers).
         select.onchange = e => {
             currentUserId = parseInt(e.target.value, 10);
+            // Update hash with current page
+            const currentPage = location.hash.replace(/^#user\/\d+\//, '') || 'dashboard';
+            location.hash = `user/${currentUserId}/${currentPage}`;
             loadDashboardUsers();
         };
 
@@ -166,6 +193,7 @@ async function loadDashboardUsers() {
 function goHome() {
     document.getElementById('dashboardApp').style.display = 'none';
     document.getElementById('homepage').style.display = 'block';
+    history.replaceState(null, '', window.location.pathname);
 }
 
 // =============================================
@@ -191,6 +219,12 @@ function showPage(page, linkElement) {
 
     document.getElementById('pageTitle').innerText = pageMeta[page].t;
     document.getElementById('headerActions').innerHTML = pageMeta[page].a;
+
+    // Persist current page in hash (silent update, won't trigger hashchange loop)
+    const newHash = `user/${currentUserId}/${page}`;
+    if (location.hash !== '#' + newHash) {
+        history.replaceState(null, '', '#' + newHash);
+    }
 
     closeModal();
 
